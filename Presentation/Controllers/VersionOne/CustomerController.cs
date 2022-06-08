@@ -17,19 +17,33 @@ namespace Presentation.Controllers.VersionOne
         {
             this.customerService = customerService;
         }
-
+        
+        /// <summary>
+        /// This endpoint is for onboarding new customers
+        /// </summary>
+        /// <param name="request">Expected request payload</param>
+        /// <returns>Result of onboarding</returns>
         [HttpPost, Route("onboardCustomer")]
         [ProducesResponseType(typeof(ResponseModel), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> OnboardCustomer([FromBody] OnboardCustomerDto request)
             => Ok(await customerService.OnboardCusoter(request));
 
+        /// <summary>
+        /// This is the endpoint used for verifying customer phone number
+        /// </summary>
+        /// <param name="request">Expected request payload</param>
+        /// <returns>Verification result</returns>
         [HttpPost, Route("verifyPhoneNumber")]
         [ProducesResponseType(typeof(ResponseModel), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> VerifyPhoneNumber([FromBody] VerifyPhoneNumberDto request)
             => Ok(await customerService.VerifyPhoneNumberViaOTP(request));
 
+        /// <summary>
+        /// This is to get all existing customers
+        /// </summary>
+        /// <returns>List of all customers</returns>
         [HttpGet, Route("allExistingCustomers")]
         [ProducesResponseType(typeof(ResponseModel<IEnumerable<Customer>>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ResponseModel<IEnumerable<Customer>>), (int)HttpStatusCode.OK)]
