@@ -3,6 +3,7 @@
     public interface IUnitOfWork : IDisposable
     {
         ICustomerRepository CustomerRepository { get; }
+        IOneTimePasswordRepository OneTimePasswordRepository { get; }
         Task<int> ExecuteCommandAsync();
     }
 }

@@ -8,5 +8,6 @@ namespace Globus.DAL.Data
     {
         public CustomerDbContext(DbContextOptions<CustomerDbContext> options) : base(options) { }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<OneTimePassword> OneTimePasswords { get; set; }
     }
 }

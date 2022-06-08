@@ -1,5 +1,8 @@
-﻿using Globus.Core.Dtos;
+﻿using Globus.Core.Common;
+using Globus.Core.Dtos;
 using Globus.Core.Entities;
+using Globus.Core.Enums;
+using Globus.Core.Utils.Hashing;
 using Globus.DAL.Repositories.Declarations;
 using Globus.Service.Declarations;
 
@@ -9,18 +12,25 @@ namespace Globus.Service.Implementations
     {
         private readonly ICustomerRepository repo;
         private readonly IUnitOfWork uow;
+        private readonly IOneTimePasswordService otpService;
 
-        public CustomerService(ICustomerRepository repo, IUnitOfWork uow)
+        public CustomerService(ICustomerRepository repo, IUnitOfWork uow, IOneTimePasswordService otpService)
         {
             this.repo = repo;
             this.uow = uow;
+            this.otpService = otpService;
         }
 
-        public async Task<bool> OnboardCusoter(OnboardCustomerDto dto)
+        public async Task<ResponseModel> OnboardCusoter(OnboardCustomerDto dto)
         {
-            var custExists = await uow.CustomerRepository.ExistAsync(c => c.PhoneNumber.ToLower().Equals(dto.PhoneNumber.ToLower()));
+            var response = new ResponseModel();
+            var custExists = await uow.CustomerRepository.ExistAsync(c => c.PhoneNumber.ToLower().Equals(dto.PhoneNumber.ToLower()) 
+                                                                  || c.Email.ToLower().Equals(dto.Email.ToLower()));
             if (custExists)
-                throw new Exception("Customer already exists");
+            {
+                response.Status = false;
+                response.Message = "Customer already exists";
+            }
 
             //validate state and lga mapping
 
@@ -28,21 +38,78 @@ namespace Globus.Service.Implementations
             {
                 PhoneNumber = dto.PhoneNumber,
                 Email = dto.Email,
-                Password = dto.Password, //hash this
+                Password = PasswordHash.EncryptData(dto.PhoneNumber, dto.Password),
                 StateOfResidence = dto.StateOfResidence,
                 LGA = dto.LGA,
+                OnboardingStatus = OnboardingStatus.NotSpecified
             });
 
             var result = await uow.ExecuteCommandAsync();
 
             if (result > 0)
-                return true;
+            {
+                response.Status = true;
+                response.Message = $"Customer added and OTP sent to phone number for verification";
 
-            return false;
+
+                //get current customer
+                var data = await uow.CustomerRepository.GetAsync(d => d.Email.ToLower().Equals(dto.Email.ToLower()));
+                //general otp
+                await otpService.StoreOTP(new SaveOTPDto { CustomerId = data.CustomerId });
+            }
+            else
+            {
+                response.Status = false;
+                response.Message = "Onboarding was not successful";
+            }
+
+            return response;
         }
-        public Task<List<Customer>> GetAllOnbordedCustomers()
+        public async Task<ResponseModel> VerifyPhoneNumberViaOTP(VerifyPhoneNumberDto dto)
         {
-            throw new NotImplementedException();
+            var response = new ResponseModel();
+            var cust = await uow.CustomerRepository.GetAsync(d => d.CustomerId.Equals(dto.CustomerId));
+            if (cust != null)
+            {
+                var validate = await otpService.ValidateOTP(new SaveOTPDto 
+                { 
+                    OTPValue = dto.OTPValue,
+                    CustomerId = dto.CustomerId
+                });
+
+                if (validate.Status.Equals(true))
+                {
+                    cust.IsOnboarded = true;
+                    cust.OnboardingStatus = OnboardingStatus.Completed;
+                    await uow.ExecuteCommandAsync();
+
+                    await otpService.UpdateOTP(new SaveOTPDto
+                    {
+                        OTPValue = dto.OTPValue,
+                        CustomerId = dto.CustomerId
+                    });
+
+                    response.Status = true;
+                    response.Message = "Phone verified successfully";
+                }
+                else
+                {
+                    response.Status = false;
+                    response.Message = "verification failed";
+                }
+            }
+
+            return response;
+        }
+        public async Task<ResponseModel<IEnumerable<Customer>>> GetAllOnbordedCustomers()
+        {
+            var list = await uow.CustomerRepository.GetAsync();
+            return new ResponseModel<IEnumerable<Customer>>
+            {
+                Status = list.Count() > 0 ? true : false,
+                Data = list.OrderByDescending(l => l.DateCreated),
+                Message = list.Count() > 0 ? $"{list.Count()} customer(s) found" : "No record found"
+            };
         }
     }
 }

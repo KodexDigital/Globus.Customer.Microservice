@@ -12,6 +12,7 @@ namespace Globus.DAL.Repositories.Implementations
         public UnitOfWork(CustomerDbContext context) { this.context = context; }
 
         public ICustomerRepository CustomerRepository => new CustomerRepository(context);
+        public IOneTimePasswordRepository OneTimePasswordRepository => new OneTimePasswordRepository(context);
 
         public async Task<int> ExecuteCommandAsync()
         {

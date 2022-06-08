@@ -15,8 +15,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Utils\Hashing\" />
-    <Folder Include="Utils\CustomValidations\" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Secure.Hash.Algorithm.SDK" Version="1.0.1" />
   </ItemGroup>
 
 </Project>

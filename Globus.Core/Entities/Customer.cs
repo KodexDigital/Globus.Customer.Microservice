@@ -1,4 +1,6 @@
-﻿namespace Globus.Core.Entities
+﻿using Globus.Core.Enums;
+
+namespace Globus.Core.Entities
 {
     public class Customer
     {
@@ -9,10 +11,13 @@
         public string StateOfResidence { get; set; }
         public string LGA { get; set; }
         public DateTime DateCreated { get; set; }
+        public bool IsOnboarded { get; set; }
+        public OnboardingStatus OnboardingStatus { get; set; }
 
         public Customer()
         {
             DateCreated = DateTime.Now;
+            IsOnboarded = false;
         }
     }
 }
