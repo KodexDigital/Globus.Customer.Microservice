@@ -1,8 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Globus.Core.Common;
+﻿using Globus.Core.Common;
+using Globus.Core.Entities;
 using Globus.Core.Utils.Hashing;
 using Globus.Service.Declarations;
 using Moq;
+using System.Collections.Generic;
 using Xunit;
 
 namespace CustomerOnboardingTests
@@ -25,6 +26,28 @@ namespace CustomerOnboardingTests
             })).ReturnsAsync(new ResponseModel { Status = true });
 
             Assert.True(true);
+        }
+
+        [Fact]
+        public void VerifyPhoneNumberViaOTPTest()
+        {
+            var responseModel = new ResponseModel();
+            var customerService = new Mock<ICustomerService>();
+            customerService.Setup(c => c.VerifyPhoneNumberViaOTP(new Globus.Core.Dtos.VerifyPhoneNumberDto 
+            {
+                OTPValue = "903349",
+                CustomerId = 1
+            })).ReturnsAsync(new ResponseModel { Status = true });
+            Assert.True(true);
+        }
+
+        [Fact]
+        public void AllOnbordedCustomersTest()
+        {
+            var customers = new ResponseModel<List<Customer>>();
+            var customerService = new Mock<ICustomerService>();
+            customerService.Setup(c => c.GetAllOnbordedCustomers())
+                .ReturnsAsync(new ResponseModel<IEnumerable<Customer>> { Data = customers.Data });
         }
     }
 }
