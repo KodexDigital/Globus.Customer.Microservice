@@ -21,7 +21,7 @@ namespace Globus.Service.Implementations
             this.otpService = otpService;
         }
 
-        public async Task<ResponseModel> OnboardCusoter(OnboardCustomerDto dto)
+        public async Task<ResponseModel> OnboardCustomer(OnboardCustomerDto dto)
         {
             var response = new ResponseModel();
             var custExists = await uow.CustomerRepository.ExistAsync(c => c.PhoneNumber.ToLower().Equals(dto.PhoneNumber.ToLower()) 
@@ -31,8 +31,6 @@ namespace Globus.Service.Implementations
                 response.Status = false;
                 response.Message = "Customer already exists";
             }
-
-            //validate state and lga mapping
 
             repo.Add(new Customer 
             {

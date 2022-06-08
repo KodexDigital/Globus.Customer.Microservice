@@ -27,7 +27,7 @@ namespace Presentation.Controllers.VersionOne
         [ProducesResponseType(typeof(ResponseModel), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> OnboardCustomer([FromBody] OnboardCustomerDto request)
-            => Ok(await customerService.OnboardCusoter(request));
+            => Ok(await customerService.OnboardCustomer(request));
 
         /// <summary>
         /// This is the endpoint used for verifying customer phone number
