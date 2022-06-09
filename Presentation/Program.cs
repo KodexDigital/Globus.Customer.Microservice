@@ -4,6 +4,7 @@ using Globus.DAL.Repositories.Implementations;
 using Globus.External.Service.Services;
 using Globus.Service.Declarations;
 using Globus.Service.Implementations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -14,6 +15,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Dbcon");
 builder.Services.AddDbContextPool<CustomerDbContext>(opt => opt.UseSqlServer(connectionString));
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Cookie settings
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+    options.SlidingExpiration = true;
+});
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(opt =>
+{
+    opt.IdleTimeout = TimeSpan.FromMinutes(5);
+    opt.Cookie.HttpOnly = true;
+    opt.Cookie.IsEssential = true;
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -36,6 +54,13 @@ builder.Services.AddTransient<ICustomerService, CustomerService>();
 builder.Services.AddTransient<IOneTimePasswordRepository, OneTimePasswordRepository>();
 builder.Services.AddTransient<IOneTimePasswordService, OneTimePasswordService>();
 builder.Services.AddTransient<IGoldService, GoldService>();
+
+builder.Services.AddApiVersioning(v =>
+{
+    v.AssumeDefaultVersionWhenUnspecified = true;
+    v.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+    v.ReportApiVersions = true;
+});
 
 var app = builder.Build();
 

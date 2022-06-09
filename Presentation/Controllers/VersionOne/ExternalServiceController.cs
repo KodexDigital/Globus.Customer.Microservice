@@ -7,6 +7,7 @@ using System.Net.Mime;
 
 namespace Presentation.Controllers.VersionOne
 {
+    [ApiVersion("1.0")]
     [Produces(MediaTypeNames.Application.Json)]
     public class ExternalServiceController : BaseController
     {

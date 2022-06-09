@@ -8,7 +8,8 @@ using System.Net.Mime;
 
 namespace Presentation.Controllers.VersionOne
 {
-    [Produces(MediaTypeNames.Application.Json)]
+    [ApiVersion("1.0")]
+    [Produces(MediaTypeNames.Application.Json)]    
     public class CustomerController : BaseController
     {
         private readonly ICustomerService customerService;
