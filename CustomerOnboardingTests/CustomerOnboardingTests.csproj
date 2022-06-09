@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Globus.External.Service\Globus.External.Service.csproj" />
     <ProjectReference Include="..\Globus.Service\Globus.Service.csproj" />
   </ItemGroup>
 
